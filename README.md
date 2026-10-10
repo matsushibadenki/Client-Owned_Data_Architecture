@@ -1,21 +1,25 @@
 # Client-Owned Data Architecture
 
-**Services provide the applications. Users own their data and authentication credentials.**
+**Independent providers deliver the applications. Users own their data and authentication credentials.**
 
 Client-Owned Data Architecture (CODA) is a proposed shared authentication and data-access foundation for web services. A local encrypted vault holds the authoritative copy of each user's data. Services receive access only during an authenticated, explicitly authorized session.
+
+Service A, Service B, and Service C are operated by different companies. Each provider owns its web application, API, infrastructure, authentication configuration, and signing keys. They integrate independently with the same user-owned vault through a common protocol.
 
 **Project status:** Design stage. This repository currently contains specifications and an architecture diagram; the application, browser extension, and SDK are not implemented yet.
 
 ## Architecture
 
-![CODA architecture: service applications connect through a browser extension and Native Messaging to a local Rust vault. Only an active session and a service-signed operation can change the user's encrypted data.](docs/assets/coda-architecture.png)
+![CODA architecture: independent Providers A, B, and C each operate their own application, API, and signing key, and connect separately to a shared user-owned vault with isolated service databases.](docs/assets/coda-architecture.png)
 
 The diagram shows the proposed desktop architecture. The browser extension establishes the local bridge and verifies the actual page origin. The Vault Core opens an outbound TLS connection to the registered service API, authenticates the service, and enforces permissions on every operation. Services never receive database files or vault encryption keys.
+
+Each provider has a separate trust boundary and API connection. The shared foundation consists of the protocol, local vault, integration SDK, and service registration mechanism. It does not require a shared business backend, shared signing keys, or a shared user database across providers.
 
 ## Core principles
 
 - **Client-owned storage:** Profiles, documents, history, and settings remain in service-specific encrypted databases on the user's device.
-- **Shared foundation:** Independent services can integrate with the same vault protocol while keeping their data namespaces and encryption keys separate.
+- **Shared foundation:** Independently operated companies can integrate with the same vault protocol while keeping their APIs, signing keys, data namespaces, encryption keys, consent, and sessions separate.
 - **Connection-required changes:** Creating, updating, deleting, or importing application data requires an active connection to the relevant service and a service-signed operation.
 - **No direct local editing:** Unlocking the vault does not grant editing rights. The vault management UI, local tools, and browser extension cannot independently change application data.
 - **Session-limited access:** Logout, revocation, locking, detected disconnection, and expiration stop further authorized access.
@@ -33,6 +37,8 @@ The diagram shows the proposed desktop architecture. The browser extension estab
 
 Connecting to Service A does not grant access to Service B's data. Offline editing and deferred offline writes are outside the MVP.
 
+Provider A cannot issue updates, recovery approvals, or access grants for Provider B. Revoking one service's consent or session affects that service without automatically ending sessions with other providers. Future cross-provider sharing requires explicit user consent; existing service signatures cannot be transferred as another provider's approval.
+
 ## Data integrity and recovery
 
 The design combines encrypted storage with persistent service signatures and a signed manifest of each service's records. Both the Vault Core and the service API verify data integrity, so locally modified content cannot be accepted simply because a modified client submits it.
@@ -45,12 +51,12 @@ Key protection, backup recovery, and signed data verification have separate role
 
 | Component | Responsibility |
 | --- | --- |
-| Service web applications and APIs | Business UI, user authentication, input validation, signed changes, transient processing |
+| Independently operated service applications and APIs | Each provider's business UI, user authentication, validation, signed changes, and transient processing |
 | Browser extension and Native Messaging host | Verified origin context and a restricted bridge to the local core |
 | Rust Vault Core | Authoritative state, authorization, sessions, keys, integrity verification, persistence, and audit records |
 | Tauri 2 management UI | Consent, connection management, storage status, backup, and recovery; dockable and floating panels |
 | Service-specific SQLCipher databases | Encrypted local application data with independent keys |
-| Service registry | Trusted service identifiers, allowed origins, public keys, and revocation information |
+| Service registry | Provider identities, globally unique service identifiers, allowed origins, public keys, and scoped revocation information; no business-data access |
 
 All management windows use state owned by Rust. If intensive image processing or GPU rendering is introduced, it will run in Rust with wgpu; large frame buffers remain on the Rust/GPU side.
 
@@ -84,7 +90,7 @@ The labels below describe planned work. No application features are currently ma
 | --- | --- |
 | 🟠 [Next] | Finalize protocol contracts, signature formats, authentication metadata policy, and freshness checkpoints |
 | 🟠 [Next] | Implement the Rust core, encrypted service databases, and connection-required signed mutations |
-| 🔴 [Later] | Add session authorization, browser integration, and two independent demo services |
+| 🔴 [Later] | Add session authorization, browser integration, and demo services representing two independent providers with distinct origins and signing keys |
 | 🔴 [Later] | Build the Tauri management UI, localization, encrypted backups, and approved recovery |
 | ⭕️ [Pending] | Validate hardware key protection, power-loss recovery, production non-retention, infrastructure, and an independent security audit |
 | 🔴 [Later] | Expand platform support, portability, synchronization, consent-based sharing, and interoperability |
