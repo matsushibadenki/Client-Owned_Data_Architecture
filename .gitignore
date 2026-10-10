@@ -1,0 +1,74 @@
+# macOS and Windows
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Local editor and agent state
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.codex/
+.agents/
+.aws/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+/secrets/
+
+# Rust / Tauri build artifacts (keep Cargo.lock for application builds)
+target/
+**/target/
+src-tauri/gen/
+
+# Web dependencies and generated output (keep package lockfiles)
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.vite/
+*.tsbuildinfo
+
+# Python development utilities
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Runtime databases, journals, and local user data
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+/vault/
+/vaults/
+/data/
+/backups/
+/recovery/
+/runtime/
+
+# Temporary files, logs, and crash dumps
+/tmp/
+/temp/
+*.log
+*.dmp
+*.core
+
+# Documentation images in docs/assets/ are intentionally tracked.
